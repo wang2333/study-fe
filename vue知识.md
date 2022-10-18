@@ -47,3 +47,5 @@
 - Hash：location.hash 推送，window.onhashchange 监听变化
 - WebHistory： history.pushState 推送，window.onpopstate 监听路由变化
 - MemoryHistory：（v4 之前叫 abstract history)页面路由无变化，浏览器没有前进和后退
+
+1

@@ -1,4 +1,4 @@
-## 生命周期
+### 生命周期
 
 - beforeCreate： 创建空白的 vue 实例；data、method 尚未被初始化，不可使用。
 - created： vue 实例初始化完成，完成响应式绑定；data、method 初始化完成，可以被调用；尚未开始渲染模板。
@@ -47,5 +47,3 @@
 - Hash：location.hash 推送，window.onhashchange 监听变化
 - WebHistory： history.pushState 推送，window.onpopstate 监听路由变化
 - MemoryHistory：（v4 之前叫 abstract history)页面路由无变化，浏览器没有前进和后退
-
-1

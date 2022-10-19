@@ -9,21 +9,21 @@
 - beforeUnmount： 组件进入销毁阶段，还未销毁；可移除解绑一些全局事件、自定义事件。
 - unmounted： 组件已被销毁，所有子组件也都被销毁。
 
-### 组件
+### keep-alive
 
 - onActivated：缓存组件被激活
 - onDeactivated：缓存组件被隐藏
-
-### Vue 什么时候操作 DOM 比较合适？
-
-- mounted 和 updated 都不能保证子组件全部挂载完成
-- 使用$nextTick 渲染 DOM
 
 ### $nextTick
 
 > 在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM
 
 我们可以理解成，Vue 在更新 DOM 时是异步执行的。当数据发生变化，Vue 将开启一个异步更新队列，视图需要等队列中所有数据变化完成之后，再统一进行更新
+
+Vue 什么时候操作 DOM 比较合适？
+
+- mounted 和 updated 都不能保证子组件全部挂载完成
+- 使用$nextTick 渲染 DOM
 
 ### slot 插槽
 
@@ -100,13 +100,43 @@
   ```
 - 按需加载，异步加载大组件
 
-### Vue3 Composition API 生命周期的区别？
-
-- 使用 step 代替了 beforeCreate 和 created
-- 使用 Hooks 函数的形式，如 mounted 改为 onMounted()
-
 ### vue-router 三种模式
 
 - Hash：location.hash 推送，window.onhashchange 监听变化
 - WebHistory： history.pushState 推送，window.onpopstate 监听路由变化
 - MemoryHistory：（v4 之前叫 abstract history)页面路由无变化，浏览器没有前进和后退
+
+### 路由守卫
+
+- 全局路由：beforeEach、beforeResolve、afterEach（参数中没有 next）
+- 组件内路由：beforeRouterEnter、beforeRouteUpdate、beforeRouteLeave
+- 路由独享：beforeEnter
+
+### 双向绑定原理
+
+1. new Vue()首先执行初始化，对 data 执行响应化处理，这个过程发生 Observe 中
+2. 同时对模板执行编译，找到其中动态绑定的数据，从 data 中获取并初始化视图，这个过程发生在 Compile 中
+3. 同时定义⼀个更新函数和 Watcher，将来对应数据变化时 Watcher 会调用更新函数
+4. 由于 data 的某个 key 在⼀个视图中可能出现多次，所以每个 key 都需要⼀个管家 Dep 来管理多个 Watcher
+5. 将来 data 中数据⼀旦发生变化，会首先找到对应的 Dep，通知所有 Watcher 执行更新函数
+
+### defineProperty 缺点
+
+1. 深度监听，需要递归到底，一次性计算量大
+2. 无法监听新增属性和删除属性
+
+### 如何监听数组变化
+
+监听对象属性时，如果是数组，重写该对象的原型
+
+```javascript
+const oldArrayProperty =  Array.prototype
+const arrProto = Object.creat(oldArrayProperty)
+['push','pop','shift','unshift'...].forEach((methodName)=>{
+  arrProto[methodName]=function(){
+    // 触发视图更新
+    updateView()
+    oldArrayProperty[methodName].call(this,...arguments)
+  }
+})
+```

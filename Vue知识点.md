@@ -9,38 +9,101 @@
 - beforeUnmount： 组件进入销毁阶段，还未销毁；可移除解绑一些全局事件、自定义事件。
 - unmounted： 组件已被销毁，所有子组件也都被销毁。
 
-### keep-alive 组件
+### 组件
 
 - onActivated：缓存组件被激活
-- deactivated：缓存组件被隐藏
+- onDeactivated：缓存组件被隐藏
 
 ### Vue 什么时候操作 DOM 比较合适？
 
 - mounted 和 updated 都不能保证子组件全部挂载完成
 - 使用$nextTick 渲染 DOM
 
+### $nextTick
+
+> 在下次 DOM 更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的 DOM
+
+我们可以理解成，Vue 在更新 DOM 时是异步执行的。当数据发生变化，Vue 将开启一个异步更新队列，视图需要等队列中所有数据变化完成之后，再统一进行更新
+
+### slot 插槽
+
+- 默认插槽
+
+  - 子组件用<slot>标签来确定渲染的位置，标签里面可以放 DOM 结构，当父组件使用的时候没有往插槽传入内容，标签内 DOM 结构就会显示在页面
+
+  - 父组件在使用的时候，直接在子组件的标签内写入内容即可
+
+- 具名插槽
+
+  - 子组件用 name 属性来表示插槽的名字，不传为默认插槽
+  - 父组件中在使用时在默认插槽的基础上加上 slot 属性，值为子组件插槽 name 属性值
+
+  ```html
+  <!-- 子组件 -->
+  <template>
+    <slot>插槽后备的内容</slot>
+    <slot name="content">插槽后备的内容</slot>
+  </template>
+  <!-- 父组件 -->
+  <child>
+    <template v-slot:default>具名插槽</template>
+    <!-- 具名插槽⽤插槽名做参数 -->
+    <template v-slot:content>内容...</template>
+  </child>
+  ```
+
+- 作用域插槽
+
+  - 子组件在作用域上绑定属性来将子组件的信息传给父组件使用，这些属性会被挂在父组件 v-slot 接受的对象上
+
+  - 父组件中在使用时通过 v-slot:（简写：#）获取子组件的信息，在内容中使用
+
+  ```html
+  <!-- 子组件 -->
+  <template>
+    <slot name="footer" testProps="子组件的值">
+      <h3>没传footer插槽</h3>
+    </slot>
+  </template>
+  <!-- 父组件 -->
+  <child>
+    <!-- 把v-slot的值指定为作⽤域上下⽂对象 -->
+    <template v-slot:default="slotProps">
+      来⾃⼦组件数据：{{slotProps.testProps}}
+    </template>
+    <!-- or -->
+    <template #default="slotProps">
+      来⾃⼦组件数据：{{slotProps.testProps}}
+    </template>
+  </child>
+  ```
+
+### 动态组件
+
+```html
+<!-- currentTab 改变时组件也改变 -->
+<component :is="tabs[currentTab]"></component>
+```
+
+在上面的例子中，被传给 :is 的值可以是以下几种：
+
+- 被注册的组件名
+- 导入的组件对象
+
+### 异步组件
+
+- import() 函数
+  ```javascript
+  components: {
+    FormComp: () => import("../XXX/FormComp")
+  }
+  ```
+- 按需加载，异步加载大组件
+
 ### Vue3 Composition API 生命周期的区别？
 
 - 使用 step 代替了 beforeCreate 和 created
 - 使用 Hooks 函数的形式，如 mounted 改为 onMounted()
-
-### Vue2 Vue3 React 三者 diff 算法区别？
-
-> Tree Diff 优化
->
-> - 只比较同一层级，不跨级比较
-> - tag 不同则删除重建（不再去比较内部的细节）
-> - 子节点通过 key 区分（key 的重要性）
-
-- Vue2：双端比较
-- Vue3：最长递增子序列比较
-- React：仅右移
-
-### Vue React 为何循环时需要使用 key？
-
-- vdom diff 算法会根据 key 判断元素是否删除
-- 匹配了 key，则只需要移动元素，性能较好
-- 为匹配 key，则删除重建，性能较差
 
 ### vue-router 三种模式
 

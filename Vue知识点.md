@@ -182,7 +182,7 @@ const arrProto = Object.creat(oldArrayProperty)
 
 1. 初次渲染
    - 解析模板为 render 函数（开发环境使用 vue-loader 已完成）
-   - 触发响应式，监听 data 属性 getter setter
+   - 解析模板时触发响应式，监听 data 属性 getter setter
    - 执行 render 函数，生成 vnode，patch(ele,vnode)
 2. 更新过程
    - 修改 data，触发 setter（此前在 getter 中被监听 ）

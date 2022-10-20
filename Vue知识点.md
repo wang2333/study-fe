@@ -100,18 +100,6 @@ Vue 什么时候操作 DOM 比较合适？
   ```
 - 按需加载，异步加载大组件
 
-### vue-router 三种模式
-
-- Hash：location.hash 推送，window.onhashchange 监听变化
-- WebHistory： history.pushState 推送，window.onpopstate 监听路由变化
-- MemoryHistory：（v4 之前叫 abstract history)页面路由无变化，浏览器没有前进和后退
-
-### 路由守卫
-
-- 全局路由：beforeEach、beforeResolve、afterEach（参数中没有 next）
-- 组件内路由：beforeRouterEnter、beforeRouteUpdate、beforeRouteLeave
-- 路由独享：beforeEnter
-
 ### 双向绑定原理
 
 1. new Vue()首先执行初始化，对 data 执行响应化处理，这个过程发生 Observe 中
@@ -119,6 +107,12 @@ Vue 什么时候操作 DOM 比较合适？
 3. 同时定义⼀个更新函数和 Watcher，将来对应数据变化时 Watcher 会调用更新函数
 4. 由于 data 的某个 key 在⼀个视图中可能出现多次，所以每个 key 都需要⼀个管家 Dep 来管理多个 Watcher
 5. 将来 data 中数据⼀旦发生变化，会首先找到对应的 Dep，通知所有 Watcher 执行更新函数
+
+### 双向数据绑定 v-model 的实现原理
+
+- input 元素的 value = this.name
+- 绑定 input 时间 this.name = $event.target.value
+- data 更新触发 re-render
 
 ### defineProperty 缺点
 
@@ -177,4 +171,33 @@ const arrProto = Object.creat(oldArrayProperty)
 - 设置新旧 VNode 的头尾指针
 - 新旧头尾指针进行比较，循环向中间靠拢，根据情况调用 patchVnode 进行 patch 重复流程、调用 createElem 创建一个新节点，从哈希表寻找 key 一致的 VNode 节点再分情况操作
 
-#
+### 模板编译
+
+- 模板编译为 render 函数，执行 render 函数返回 vnode
+- 基于 vnode 再执行 patch 和 diff
+- 使用 webpack vue-loader，会在开发环境下编译模板
+- vue.runtime.js 中没有 compiler，需要使用 h 函数来渲染页面
+
+### 组价渲染过程
+
+1. 初次渲染
+   - 解析模板为 render 函数（开发环境使用 vue-loader 已完成）
+   - 触发响应式，监听 data 属性 getter setter
+   - 执行 render 函数，生成 vnode，patch(ele,vnode)
+2. 更新过程
+   - 修改 data，触发 setter（此前在 getter 中被监听 ）
+   - 重新执行 render 函数，生成 newVnode
+   - patch(vnode,newVnode)
+
+### vue-router 三种模式
+
+- Hash：location.hash 推送，window.onhashchange 监听变化
+- WebHistory： history.pushState 推送，window.onpopstate 监听路由变化
+- MemoryHistory：（v4 之前叫 abstract history)页面路由无变化，浏览器没有前进和后退
+
+### 路由守卫
+
+- 全局路由：beforeEach、beforeResolve、afterEach（参数中没有 next）
+- 组件内路由：beforeRouterEnter、beforeRouteUpdate、beforeRouteLeave
+- 路由独享：beforeEnter
+-

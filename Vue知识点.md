@@ -155,7 +155,7 @@ const arrProto = Object.creat(oldArrayProperty)
 - 新旧 vnode 对比，得出最小的更新范围，最好更新 DOM
 - 数据驱动视图的模式下，有效控制 DOM 操作
 
-### diff 算法
+### Vue2 diff 算法
 
 1.patch 函数前两个参数位为 oldVnode 和 Vnode ，分别代表新的节点和之前的旧节点，主要做了四个判断：
 

@@ -77,3 +77,69 @@ return ReactDOM.creatPortal(
 - shouldComponentUpdate：对 state 和 props，确定是否要重新渲染，默认情况下返回 true
 - PureComponent：，通过对 props 和 state 的浅比较结果来实现 shouldComponentUpdate
 - React.memo：如果需要深层次比较，这时候可以给 memo 第二个参数传递比较函数
+
+### React 公共逻辑抽离
+
+- HOC：模式简单，但会增加组件层级
+- Reader props：代码简介
+
+### Redux 单向数据流
+
+- `store = redux.createStore(reducer);`
+- 通过 store.dispatch 来派发 action
+- reducer -> newState
+- store.subscrible 方法订阅 store 的改变
+
+### react-redux
+
+- Provider
+
+  在 redux 中存在一个 store 用于存储 state，如果将这个 store 存放在顶层元素中，其他组件都被包裹在顶层元素之上
+
+  那么所有的组件都能够受到 redux 的控制，都能够获取到 redux 中的数据
+
+  ```javascript
+  <Provider store = {store}>
+    <App />
+  <Provider>
+  ```
+
+- connect 高阶组件
+
+  connect 方法将 store 上的 getState 和 dispatch 包装成组件的 props
+
+  ```javascript
+  import { connect } from "react-redux"
+  Comp = connect(mapStateToProps, mapDispatchToProps)(Comp)
+  ```
+
+  - mapStateToProps：把 redux 中的数据映射到 react 中的 props 中去
+
+  ```javascript
+  const mapStateToProps = (state) => {
+    return {
+      // prop : state.xxx  | 意思是将state中的某个数据映射到props中
+      foo: state.bar,
+    }
+  }
+  ```
+
+  - mapDispatchToProps：将 redux 中的 dispatch 映射到组件内部的 props 中
+
+  ```javascript
+  const mapDispatchToProps = (dispatch) => {
+    // 默认传递参数就是dispatch
+    return {
+      onClick: () => {
+        dispatch({
+          type: "increatment",
+        })
+      },
+    }
+  }
+  ```
+
+### redux 中间件
+
+- redux-thunk 异步处理中间件
+  - redux-thunk 会判断你当前传进来的数据类型，如果是一个函数，将会给函数传入参数值（dispatch，getState）

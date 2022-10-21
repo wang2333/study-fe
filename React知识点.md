@@ -24,6 +24,23 @@
 - React17 事件绑定到 root 组件上
 - 有利于多个 React 版本共存，例如微前端
 
+### 合成事件
+
+```javascript
+;<button onClick={handleClick}>button</button>
+const handleClick = (e) => {
+  console.log(e) // SyntheticBaseEvent
+  console.log(e.target) // button
+  console.log(e.currentTarget) // button
+  console.log(e.nativeEvent.target) // button
+  console.log(e.nativeEvent.currentTarget) // #root
+}
+```
+
+- 更好的兼容性和跨平台
+- 全部挂载到 document 上，减少内存消耗，避免频繁解绑
+- 方便事件的统一管理（如事务机制）
+
 ### 受控组件和非受控组件
 
 - 两者的区别就在于组件内部的状态是否是全程受控的
@@ -36,18 +53,37 @@
 - 在调用 super 过程，无论是否传入 props，React 内部都会将 porps 赋值给组件实例 porps 属性中
 - 如果只调用了 super()，那么 this.props 在 super() 和构造函数结束之间仍是 undefined
 
-### setState 本质是同步
+### setState
 
-- 在组件生命周期或 React 合成事件中，setState 是异步
-- 在 setTimeout 或者原生 dom 事件中，setState 是同步
-- setState 是同步的执行，state 都是同步更新，因为考虑到性能，多次修改 state，只进行一次 DOM 渲染
-- 即，在微任务 Promise.then 之前，state 已经计算完了
+- setState 主流程
 
-### setState 合并
+  - this.setState(newState)
+  - newState 存入 pending 队列
+  - 判断是否处于 batch update
+  - 是，则保存组件于 drityComponents 中
+  - 否，则遍历所有的 drityComponents，调用 updateCompinent，更新 pending State or props
 
-- setState 第一个参数是对象时，会被合并
-- setState 第一个参数是函数时，不会被合并
-- setState 第二个参数是一个回调函数，用于可以实时的获取到更新之后的数据
+  ```javascript
+  increase = () => {
+    // 开始：处于batchUpdate
+    // isBatchingUpdates = tue
+    this.setState({ count: 1 }) // 此时isBatchingUpdates为false
+    setTimeout(() => {
+      this.setState({ count: 1 }) // 此时isBatchingUpdates为false
+    })
+    // 结束，isBatchingUpdates = false
+  }
+  ```
+
+- setState 异步还是同步
+  - 看是否能命中 batchUpdate 机制
+  - 判断 isBatchingUpdates
+- 哪些能命中 batchUpdate 机制
+  - React 可以管理的入口
+- setState 合并
+  - setState 第一个参数是对象时，会被合并
+  - setState 第一个参数是函数时，不会被合并
+  - setState 第二个参数是一个回调函数，用于可以实时的获取到更新之后的数据
 
 ### 函数组件
 
@@ -143,3 +179,31 @@ return ReactDOM.creatPortal(
 
 - redux-thunk 异步处理中间件
   - redux-thunk 会判断你当前传进来的数据类型，如果是一个函数，将会给函数传入参数值（dispatch，getState）
+- redux-saga
+
+### JSX 本质
+
+> react 通过 babel 把 JSX 转成 createElement 函数，生成 ReactElement 对象，然后通过 ReactDOM.render 函数把 ReactElement 渲染成真是的 DOM 元素
+
+```javascript
+const ele = (
+  <div id="a">
+    <span>1212</span>
+  </div>
+)
+var ele = React.createElement(
+  "div",
+  {
+    id: "a",
+  },
+  React.createElement("span", null, "1212")
+)
+```
+
+### React fibel
+
+- React 更新的的两个阶段
+  - reconciliation 阶段执行 diff 算法，纯 JS 计算
+  - commit 阶段，将 diff 结果渲染到 DOM
+- 将 reconciliation 阶段进行任务拆分
+- window.requestIdleCallback 当 DOM 需要渲染时暂停
